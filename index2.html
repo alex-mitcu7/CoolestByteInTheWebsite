@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta content="stuff, to, help, search, engines, not" name="keywords">
+<meta content="What this page is about." name="description">
+<meta content="Display Webcam Stream" name="title">
+<title>Display Webcam Stream</title>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js"></script>
+<style>
+#container {
+    margin: 0px auto;
+    width: 500px;
+    height: 370px;
+    border: 10px #333 solid;
+}
+#videoElement {
+    width: 500px;
+    height: 375px;
+    background-color: #666;
+}
+</style>
+</head>
+  
+<body>
+<div id="container">
+</div>
+<script src="webcam.js"></script>
+
+<div id="my_result"></div>
+
+<script language="JavaScript">
+
+    $(function() {
+    	Webcam.attach( '#container' )
+    });
+
+    Webcam.on('live', function(){
+    	var intervalID = setInterval(function() {
+        	take_snapshot();
+    	}, 3000);
+    	setTimeout(function() {
+        	clearInterval(intervalID);
+    	}, 3000);
+	});
+
+    var analyze = function(data_url) {
+        
+        var params = {
+            // Request parameters
+            // Empty parameters
+        };
+      	
+        $.ajax({
+            url: "https://api.projectoxford.ai/emotion/v1.0/recognize?" + $.param(params),
+            beforeSend: function(xhrObj){
+                // Request headers
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","c52339aa40b14a439016260018edec3d");
+            },
+            type: "POST",
+            // Request body
+            data: '{"url": ' + data_url + '}',
+            processData: false
+        })
+        .done(function(data) {
+            alert("success");
+        })
+        .fail(function() {
+            alert("error");
+        });
+    }
+
+    function take_snapshot() {
+        Webcam.snap( function(data_uri) {
+        	
+        	Webcam.upload( data_uri, 'myscript.php');
+        	data_url = "webcam.jpg";
+        	analyze(data_uri);
+        });
+    }
+</script>
+
+<a href="javascript:void(take_snapshot())">Take Snapshot</a>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>How are you feeling?</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="assets/js/chart.js"></script>
+    <script src="assets/js/webcam.js"></script>
+    <script>
+    $(function() {
+      Webcam.attach( '#container' )
+    });
+
+    Webcam.on('live', function(){
+      var intervalID = setInterval(function() {
+          take_snapshot();
+      }, 3000);
+      setTimeout(function() {
+          clearInterval(intervalID);
+      }, 3000);
+  });
+
+    var analyze = function() {
+        
+        var params = {
+            // Request parameters
+            // Empty parameters
+        };
+        
+        $.ajax({
+            url: "https://api.projectoxford.ai/emotion/v1.0/recognize?" + $.param(params),
+            beforeSend: function(xhrObj){
+                // Request headers
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","c52339aa40b14a439016260018edec3d");
+            },
+            type: "POST",
+            // Request body
+            data: '{"url": "https://portalstoragewuprod2.azureedge.net/emotion/recognition2.jpg"}',
+        })
+        .done(function(data) {
+            ProcessResult(data);
+        })
+        .fail(function(error) {
+            console.log(error.getAllResponseHeaders());
+            alert("fail");
+        });
+    }
+
+    function take_snapshot() {
+        Webcam.snap( function(data_uri) {
+          
+          Webcam.upload( data_uri, 'myscript.php');
+          analyze();
+        });
+    }
+
+
+    function ProcessResult(response)
+    {
+      //var data = jQuery.parseJSON(response);
+      for(index in response) {
+        if(response[index].scores.anger > 0.5)
+          $("#response").html("<h3>Feeling a bit angry?</h3>");
+
+        if(response[index].scores.contempt > 0.5)
+          $("#response").html("<h3>Why the contempt?</h3>");
+
+        if(response[index].scores.disgust > 0.5)
+          $("#response").html("<h3>What did provoke that disgust?</h3>");
+
+        if(response[index].scores.fear > 0.5)
+          $("#response").html("<h3>Relax, you have nothing to worry about!</h3>");
+
+        if(response[index].scores.happiness > 0.5)
+          $("#response").html("<h3>Having a good day?</h3>");
+
+        if(response[index].scores.neutral > 0.5)
+          $("#response").html("<h3>How are we feeling today?</h3>");
+
+        if(response[index].scores.sadness > 0.5)
+          $("#response").html("<h3>What happened? You seem sad.</h3>");
+
+        if(response[index].scores.surprise > 0.5)
+          $("#response").html("<h3>Everyone loves surprises!</h3>");
+      }
+    }
+    </script>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><i class="fa fa-bolt"></i></a>
+        </div>
+      </div>
+    </div>
+
+
+  <div id="hello">
+      <div id="container">
+
+      </div> <!-- /container -->
+      <br>
+      <div id="response">
+      </div>
+  </div><!-- /hello -->
+  
+  <div id="green">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-5 centered">
+          <img src="assets/img/iphone.png" alt="">
+        </div>
+        
+        <div class="col-lg-7 centered">
+          <h3>WHAT CAN WE DO?</h3>
+          <p>Hi. From now on, I will be your personal diary, and one of your most trustworthy friends.
+          I will try and analise your feelings and emotions in real time, so I can now how to behave myself.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="f">
+    <div class="container">
+    </div>
+  </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/bootstrap.js"></script>
+  </body>
+</html>
